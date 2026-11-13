@@ -1,0 +1,357 @@
+/* ===================================================================
+   ŚWIĄTECZNY PRZEPYCH EDITION  🎄✨🎁
+   =================================================================== */
+:root {
+  --red: #b3123b;
+  --red-dark: #5a0819;
+  --green: #0b5d3b;
+  --green-dark: #03261a;
+  --gold: #f5c542;
+  --gold-light: #fff3b0;
+  --cream: #fff8e7;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Mountains of Christmas", Georgia, "Times New Roman", serif;
+  color: var(--cream);
+  background:
+    radial-gradient(ellipse at top, #1d6b45 0%, transparent 60%),
+    radial-gradient(ellipse at bottom right, #7a0c24 0%, transparent 55%),
+    linear-gradient(180deg, #06241a 0%, #0c3a2a 50%, #3a0712 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 80px 16px 110px;
+}
+
+/* ---------- Tytuły ---------- */
+h1 {
+  font-size: clamp(2.4rem, 7vw, 4rem);
+  text-align: center;
+  margin: 0.2em 0 0.1em;
+  line-height: 1.1;
+  background: linear-gradient(90deg, var(--gold-light), var(--gold), #fff, #e0a526, var(--gold-light));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+  filter: drop-shadow(0 0 22px rgba(245, 197, 66, 0.35));
+}
+h2 {
+  font-size: 1.6rem;
+  text-align: center;
+  color: var(--gold);
+  text-shadow: 0 0 14px rgba(245, 197, 66, 0.6), 0 2px 0 #5a3a00;
+  margin: 0.2em 0 0.6em;
+}
+.subtitle { text-align: center; font-style: italic; color: var(--gold-light); opacity: 0.9; }
+
+/* ---------- Karty ---------- */
+section,
+form.card {
+  position: relative;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(245, 197, 66, 0.6);
+  border-radius: 24px;
+  padding: 30px 22px 22px;
+  margin: 30px 0;
+  box-shadow:
+    0 0 0 5px rgba(179, 18, 59, 0.35),
+    0 0 0 9px rgba(11, 93, 59, 0.35),
+    0 24px 60px rgba(0, 0, 0, 0.5),
+    inset 0 0 50px rgba(245, 197, 66, 0.08);
+  animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+section::before,
+form.card::before {
+  content: "🎀";
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  font-size: 2.2rem;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+  animation: sway 3s ease-in-out infinite;
+  z-index: 2;
+}
+
+/* ---------- Pola i przyciski ---------- */
+input {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--gold);
+  border-radius: 999px;
+  padding: 12px 20px;
+  font: inherit;
+  color: #3a0712;
+  margin: 6px 10px 6px 0;
+  box-shadow: 0 0 18px rgba(245, 197, 66, 0.3);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+input::placeholder { color: #9b6b74; }
+input:focus {
+  outline: none;
+  transform: scale(1.03);
+  box-shadow: 0 0 30px rgba(245, 197, 66, 0.8);
+}
+
+button {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 24px;
+  margin: 6px 0;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff3b5c, var(--red) 50%, #7a0c24);
+  box-shadow: 0 6px 0 var(--red-dark), 0 12px 26px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.2s;
+}
+button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -90%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transform: skewX(-20deg);
+  animation: sheen 3.6s ease-in-out infinite;
+}
+button:hover:not(:disabled) { transform: translateY(-3px) rotate(-1.5deg); filter: brightness(1.1); }
+button:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 var(--red-dark); }
+button:disabled { filter: grayscale(0.7); opacity: 0.5; cursor: not-allowed; }
+button.secondary {
+  background: linear-gradient(135deg, #1fa366, var(--green) 50%, var(--green-dark));
+  box-shadow: 0 6px 0 var(--green-dark), 0 12px 26px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+button.secondary:active:not(:disabled) { box-shadow: 0 2px 0 var(--green-dark); }
+
+/* ---------- Listy ---------- */
+ul.list { list-style: none; padding: 0; margin: 0; }
+ul.list li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  margin: 6px 0;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px dashed rgba(245, 197, 66, 0.4);
+  transition: transform 0.25s, background 0.25s;
+}
+ul.list li:hover { transform: translateX(8px) scale(1.01); background: rgba(245, 197, 66, 0.12); }
+ul.list li > span:first-child { font-weight: 700; }
+
+/* ---------- Wynik + prezent ---------- */
+.reveal-wrap { text-align: center; }
+.gift {
+  font-size: clamp(5rem, 14vw, 7rem);
+  line-height: 1;
+  animation: wiggle 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5));
+}
+.result {
+  font-size: clamp(1.6rem, 4.5vw, 2.5rem);
+  text-align: center;
+  margin: 14px auto 0;
+  padding: 22px;
+  max-width: 90%;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #b3123b, #0b5d3b);
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 40px rgba(245, 197, 66, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.15);
+  color: var(--gold-light);
+}
+.result strong { color: #fff; text-shadow: 0 0 18px rgba(255, 255, 255, 0.9); }
+.reveal { animation: pop 1s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+.budget { text-align: center; font-size: 1.15rem; }
+
+.hint, .muted { color: rgba(255, 248, 231, 0.75); font-size: 0.95rem; }
+[role="alert"] {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--red);
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-weight: 700;
+  animation: shake 0.5s;
+}
+code {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px dashed var(--gold);
+  padding: 4px 10px;
+  border-radius: 12px;
+  color: var(--gold-light);
+  font-family: ui-monospace, monospace;
+}
+a { color: var(--gold); font-weight: 700; text-decoration: none; }
+a:hover { text-shadow: 0 0 12px var(--gold); }
+
+/* ---------- Dekoracje tła (components/festive) ---------- */
+.lights {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 3;
+}
+.lights::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #1a2a20;
+  border-radius: 3px;
+}
+.bulb {
+  position: relative;
+  width: 14px;
+  height: 22px;
+  margin-top: 10px;
+  border-radius: 50% 50% 60% 60%;
+  background: var(--c);
+  box-shadow: 0 0 12px var(--c), 0 0 26px var(--c);
+  animation: blink 1.6s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+
+.snowflake {
+  position: fixed;
+  top: -10vh;
+  color: #fff;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.sleigh {
+  position: fixed;
+  top: 48px;
+  left: -260px;
+  font-size: 2.6rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4));
+  animation: sleigh 22s linear infinite;
+}
+
+.ornament {
+  position: fixed;
+  bottom: 18px;
+  font-size: 3.6rem;
+  pointer-events: none;
+  z-index: 0;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5));
+  animation: float 4s ease-in-out infinite;
+}
+.o-left { left: 10px; }
+.o-right { right: 10px; animation-delay: -2s; }
+
+.confetti-piece {
+  position: fixed;
+  top: -24px;
+  width: 11px;
+  height: 16px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 4;
+  animation-name: confetti;
+  animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  animation-fill-mode: forwards;
+}
+
+.music-toggle {
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  z-index: 5;
+  font-size: 0.95rem;
+  padding: 10px 18px;
+  margin: 0;
+}
+
+/* ---------- Animacje ---------- */
+@keyframes shimmer { to { background-position: 300% 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(40px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes sway { 0%, 100% { transform: translateX(-50%) rotate(-8deg); } 50% { transform: translateX(-50%) rotate(8deg); } }
+@keyframes sheen { 0%, 60% { left: -90%; } 100% { left: 140%; } }
+@keyframes wiggle { 0%, 100% { transform: rotate(-6deg) scale(1); } 50% { transform: rotate(6deg) scale(1.08); } }
+@keyframes pop { from { opacity: 0; transform: scale(0.3) rotate(-10deg); } to { opacity: 1; transform: none; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+@keyframes blink { 0%, 100% { opacity: 1; filter: brightness(1.2); } 50% { opacity: 0.25; filter: brightness(0.6); } }
+@keyframes fall {
+  to { transform: translate3d(var(--drift, 0px), 115vh, 0) rotate(360deg); }
+}
+@keyframes sleigh { to { transform: translateX(calc(100vw + 300px)); } }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-16px) rotate(4deg); } }
+@keyframes confetti {
+  to { transform: translate3d(var(--x, 0px), 115vh, 0) rotate(900deg); opacity: 0.9; }
+}
+
+/* ---------- Dostępność: szanuj „ogranicz ruch” ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition: none !important;
+  }
+  .snowflake, .confetti-piece, .sleigh { display: none !important; }
+}
+
+@media (max-width: 520px) {
+  .ornament { font-size: 2.4rem; }
+  .sleigh { font-size: 2rem; }
+  .music-toggle { font-size: 0.8rem; padding: 8px 12px; }
+}
+
+/* ---------- Koło fortuny ---------- */
+.wheel-wrap { position: relative; width: min(300px, 80vw); margin: 22px auto 12px; }
+.wheel {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px var(--gold), 0 0 0 12px var(--red), 0 0 50px rgba(245, 197, 66, 0.5), 0 20px 40px rgba(0, 0, 0, 0.5);
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.17, 0.67, 0.12, 0.99);
+  will-change: transform;
+}
+.wheel-pointer {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.2rem;
+  color: var(--gold);
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}

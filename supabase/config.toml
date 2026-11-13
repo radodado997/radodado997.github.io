@@ -1,0 +1,25 @@
+# Minimalna konfiguracja Supabase CLI dla `supabase start` / `supabase test db`.
+project_id = "secret-santa"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+
+[db]
+port = 54322
+pooler_enabled = false
+
+[realtime]
+enabled = true
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000"]
+# Bez logowania: każdy odwiedzający dostaje anonimową sesję.
+enable_anonymous_sign_ins = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
