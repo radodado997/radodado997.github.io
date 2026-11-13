@@ -21,6 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <noscript>
+          <p style={{ textAlign: "center", padding: 24 }}>Ta strona wymaga JavaScriptu. Włącz go, proszę. 🎄</p>
+        </noscript>
         <FestiveBackground />
         <div className="container">
           <AuthGate>{children}</AuthGate>

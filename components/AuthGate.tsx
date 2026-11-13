@@ -28,7 +28,16 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    ensureSession().then((err) => (err ? setError(err) : setReady(true)));
+    ensureSession()
+      .then((err) => (err ? setError(err) : setReady(true)))
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+  }, []);
+
+  // Jeśli po 12 s nadal ładuje, pokaż diagnozę zamiast pustego ekranu.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setSlow(true), 12000);
+    return () => window.clearTimeout(t);
   }, []);
 
   if (error) {
@@ -38,6 +47,17 @@ export default function AuthGate({ children }: { children: ReactNode }) {
       </section>
     );
   }
-  if (!ready) return <p className="muted">Ładowanie choinki… 🎄</p>;
+  if (!ready)
+    return (
+      <section>
+        <p className="muted">Ładowanie choinki… 🎄</p>
+        {slow && (
+          <p role="alert">
+            Strona wczytuje się zbyt długo. Sprawdź adres i połączenie z internetem
+            (Supabase: {process.env.NEXT_PUBLIC_SUPABASE_URL ? "adres ustawiony" : "BRAK NEXT_PUBLIC_SUPABASE_URL w buildzie"}).
+          </p>
+        )}
+      </section>
+    );
   return <>{children}</>;
 }

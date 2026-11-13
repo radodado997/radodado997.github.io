@@ -27,11 +27,19 @@ jobs:
 
       - run: npm ci
 
+      # Repozytorium "nazwa.github.io" to strona z korzenia domeny (bez prefiksu).
+      # Każde inne repozytorium działa pod /NAZWA-REPO.
+      - name: Ustal BASE_PATH
+        run: |
+          name="${GITHUB_REPOSITORY#*/}"
+          if [[ "$name" == *.github.io ]]; then bp=""; else bp="/$name"; fi
+          echo "BASE_PATH=$bp" >> "$GITHUB_ENV"
+          echo "Using BASE_PATH='$bp'"
+
       - name: Build (static export)
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          BASE_PATH: /${{ github.event.repository.name }}
         run: npm run build
 
       # GitHub Pages ignoruje katalogi zaczynające się od "_" (np. _next), chyba że jest .nojekyll.
