@@ -10,7 +10,8 @@ Wynik widzi tylko losujący.
   Dzięki temu RLS i funkcje SQL działają bez zmian.
 - `/` tworzy pokój (twórca = admin). `/join/?code=KOD` dołącza do pokoju. `/room/?id=ID` to widok pokoju.
 - Aplikacja to eksport statyczny (`out/`): bez serwera, więc działa na GitHub Pages.
-- Admin dodaje osoby i startuje losowanie (wymaga ≥ 3 osób, z których każda wybrała tożsamość).
+- Admin dodaje osoby i zatwierdza pokój (wymaga ≥ 3 osób). Zatwierdzenie od razu losuje przydziały dla wszystkich.
+- Każdy może w dowolnym momencie wejść do pokoju, wybrać swoją tożsamość (zajętej nie da się przejąć) i wylosować. Wynik odsłania się tylko losującemu.
 - Prywatność wymuszają RLS i funkcje `SECURITY DEFINER` w bazie (szczegóły w migracji).
 
 **Uwaga:** tożsamość jest przypisana do przeglądarki. Wyczyszczenie danych witryny lub inne urządzenie
@@ -51,8 +52,8 @@ npm run typecheck
 
 ## Ręczny test punktu 5
 
-1. Przeglądarka A tworzy pokój, dodaje Ala, Bartek, Celina, kopiuje link.
-2. Okno prywatne (B) otwiera link, wybiera Bartka. C robi to samo z Celiną. A wybiera Alę i startuje.
-3. Wszyscy losują.
-4. W konsoli B: `await supabase.from('draws').select('*')` → 1 wiersz (własny).
-5. Admin (A): to samo zapytanie → 1 wiersz. Nie ma sposobu, by zobaczyć wynik B lub C.
+1. Przeglądarka A tworzy pokój, dodaje Ala, Bartek, Celina, kopiuje link, zatwierdza pokój.
+2. Okno prywatne (B) otwiera link, wybiera Bartka i klika „Losuj”. C dołącza później, wybiera Celinę i losuje.
+3. W konsoli B: `await supabase.from('draws').select('*')` → błąd braku uprawnień (klient nie czyta tabeli `draws`).
+4. `await supabase.rpc('get_my_draw', { p_room: ID })` → tylko wynik B; przed losowaniem `null`.
+5. Admin (A) widzi w panelu wyłącznie licznik „jeszcze nie losowały”, bez wyników innych osób.

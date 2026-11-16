@@ -31,7 +31,7 @@ export default function AdminPanel({ room, participants, onChange }: Props) {
     }
   }
 
-  const canStart = room.participant_count >= 3 && room.claimed_count === room.participant_count;
+  const canStart = room.participant_count >= 3;
 
   return (
     <section>
@@ -69,16 +69,16 @@ export default function AdminPanel({ room, participants, onChange }: Props) {
       <button
         disabled={busy || !canStart}
         onClick={() => {
-          if (confirm("Rozpocząć losowanie? Po starcie zmiana listy osób nie będzie możliwa.")) {
+          if (confirm("Zatwierdzić pokój? Przydziały zostaną wylosowane od razu dla wszystkich. Lista osób zostanie zamknięta.")) {
             run(() => supabase.rpc("start_room", { p_room: room.id }));
           }
         }}
       >
-        Start losowania
+        Zatwierdź pokój i wylosuj przydziały 🎅
       </button>
       {!canStart && (
         <p className="hint">
-          Start wymaga co najmniej 3 osób, z których każda wybrała swoją tożsamość.
+          Zatwierdzenie wymaga co najmniej 3 osób. Nie musisz czekać, aż wszyscy wybiorą tożsamość.
         </p>
       )}
       {error && <p role="alert">{error}</p>}

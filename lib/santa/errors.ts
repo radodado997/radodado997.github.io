@@ -11,8 +11,6 @@ const MESSAGES: Record<string, string> = {
   no_identity: "Najpierw wybierz swoją tożsamość.",
   duplicate_name: "Osoba o takim imieniu jest już w pokoju.",
   need_at_least_3_participants: "Potrzeba co najmniej 3 osób.",
-  all_participants_must_claim_identity:
-    "Każda osoba musi najpierw wybrać swoją tożsamość.",
   participant_not_removable: "Nie można usunąć tej osoby (wybrała już tożsamość).",
   no_valid_target: "Nie udało się wylosować. Spróbuj ponownie.",
 };

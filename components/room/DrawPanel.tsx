@@ -10,7 +10,9 @@ import FortuneWheel from "@/components/festive/FortuneWheel";
 const SPIN_MS = 4500;
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Wynik widzi wyłącznie losujący. Baza zwraca go tylko dla powiązanego konta (get_my_draw / draw_name).
+// Przydziały powstały przy zatwierdzeniu pokoju. Losowanie tylko odsłania wynik
+// osoby wywołującej (draw_name); wynik zwraca wyłącznie baza, dla powiązanego konta.
+// Panel renderowany jest tylko dla pokoju po starcie i dla osoby z wybraną tożsamością.
 export default function DrawPanel({ room }: { room: Room }) {
   const [supabase] = useState(() => createClient());
   const [result, setResult] = useState<string | null>(null);
@@ -22,25 +24,27 @@ export default function DrawPanel({ room }: { room: Room }) {
   const [burst, setBurst] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     supabase.rpc("get_my_draw", { p_room: room.id }).then(({ data, error }) => {
+      if (cancelled) return;
       if (error) setError(messageFor(error));
       else setResult((data as string | null) ?? null);
       setLoading(false);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [room.id, supabase]);
 
   async function draw() {
     setBusy(true);
     setSpinning(true);
     setError(null);
-    // Koło kręci się kilka obrotów plus losowy kąt. To tylko efekt wizualny.
+    // Koło kręci się kilka obrotów plus losowy kąt. To tylko efekt wizualny, nie wynik.
     setAngle((a) => a + 360 * 6 + Math.round(Math.random() * 360));
 
     // Czekamy, aż skończy się animacja ORAZ odpowie baza; wynik pokazujemy dopiero potem.
-    const [rpc] = await Promise.all([
-      supabase.rpc("draw_name", { p_room: room.id }),
-      wait(SPIN_MS),
-    ]);
+    const [rpc] = await Promise.all([supabase.rpc("draw_name", { p_room: room.id }), wait(SPIN_MS)]);
 
     setSpinning(false);
     setBusy(false);
@@ -88,7 +92,7 @@ export default function DrawPanel({ room }: { room: Room }) {
           </p>
           <div style={{ textAlign: "center" }}>
             <button onClick={draw} disabled={busy}>
-              {spinning ? "Koło się kręci… 🎡" : "🎲 Zakręć i losuj"}
+              {spinning ? "Koło się kręci… 🎡" : "🎲 Losuj"}
             </button>
           </div>
         </>
