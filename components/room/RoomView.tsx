@@ -101,19 +101,17 @@ export default function RoomView({ initialRoom }: { initialRoom: Room }) {
         <AdminPanel room={room} participants={participants} onChange={reload} />
       )}
 
-      {isOpen && !me && (
-        <IdentityPicker room={room} participants={participants} onDone={reload} />
-      )}
-      {isOpen && me && (
+      {/* Wybór tożsamości jest możliwy zawsze, także po zatwierdzeniu pokoju. */}
+      {!me && <IdentityPicker room={room} participants={participants} onDone={reload} />}
+
+      {me && isOpen && (
         <section>
-          Twoja tożsamość: <strong>{me.display_name}</strong>. Czekaj na start losowania.
+          Twoja tożsamość: <strong>{me.display_name}</strong>. Losowanie ruszy po zatwierdzeniu pokoju przez administratora.
         </section>
       )}
 
-      {!isOpen && me && <DrawPanel room={room} />}
-      {!isOpen && !me && (
-        <section>Losowanie wystartowało bez Twojej tożsamości, więc nie możesz w nim uczestniczyć.</section>
-      )}
+      {/* Po zatwierdzeniu każdy z tożsamością może wylosować w dowolnym momencie. */}
+      {me && !isOpen && <DrawPanel room={room} />}
     </>
   );
 }

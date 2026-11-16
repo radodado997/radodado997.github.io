@@ -7,6 +7,8 @@ import type { Participant, Room } from "@/lib/santa/types";
 
 type Props = { room: Room; participants: Participant[]; onDone: () => void };
 
+// Wybór tożsamości jest dostępny w każdej chwili (przed i po zatwierdzeniu pokoju).
+// Wpis zajęty przez kogoś innego znika z listy; baza i tak odrzuca próbę przejęcia.
 export default function IdentityPicker({ room, participants, onDone }: Props) {
   const [supabase] = useState(() => createClient());
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,8 @@ export default function IdentityPicker({ room, participants, onDone }: Props) {
     <section>
       <h2>Kim jesteś?</h2>
       <p className="muted">
-        Wybierz swój wpis. Po wyborze ta tożsamość zostaje przypisana tylko do Ciebie.
+        Wybierz swój wpis z listy. Po wyborze ta tożsamość należy tylko do Ciebie i nikt inny jej nie przejmie.
+        {room.status === "started" && " Losowanie już trwa, możesz dołączyć i wylosować w dowolnym momencie."}
       </p>
       {free.length === 0 ? (
         <p>Wszystkie wpisy są już wybrane.</p>
@@ -36,7 +39,9 @@ export default function IdentityPicker({ room, participants, onDone }: Props) {
           {free.map((p) => (
             <li key={p.id}>
               <span>{p.display_name}</span>
-              <button disabled={busy} onClick={() => claim(p)}>To ja</button>
+              <button disabled={busy} onClick={() => claim(p)}>
+                To ja
+              </button>
             </li>
           ))}
         </ul>

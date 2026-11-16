@@ -1,6 +1,8 @@
 // Test integracyjny punktu 5 przez REST/RPC (dokładnie tak, jak działa klient).
-// Wymaga działającego Supabase (lokalnie: `supabase start`) i zmiennych z .env.local.
-// Uruchomienie: npm test
+// Model: przydziały powstają przy zatwierdzeniu (start_room), a draw_name tylko odsłania wynik.
+// Wymaga działającego projektu Supabase z migracjami oraz zmiennych w środowisku:
+//   NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+// Bez nich test jest pomijany. Uruchomienie: npm test
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
@@ -28,6 +30,7 @@ describe.skipIf(!enabled)("punkt 5: prywatność wyników przez API (RLS + RPC)"
   const players: { client: SupabaseClient; id: string }[] = [];
   let outsider: SupabaseClient;
   const names: string[] = [];
+  const participantIds: string[] = [];
 
   beforeAll(async () => {
     for (let i = 0; i < 3; i++) players.push(await newUser());
@@ -42,7 +45,6 @@ describe.skipIf(!enabled)("punkt 5: prywatność wyników przez API (RLS + RPC)"
       .from("rooms").select("invite_code").eq("id", roomId).single();
     if (codeErr) throw codeErr;
 
-    const participantIds: string[] = [];
     for (const n of ["Ala", "Bartek", "Celina"]) {
       names.push(n);
       const { data, error } = await admin0.client.rpc("add_participant", { p_room: roomId, p_name: n });
@@ -50,13 +52,14 @@ describe.skipIf(!enabled)("punkt 5: prywatność wyników przez API (RLS + RPC)"
       participantIds.push(data as string);
     }
 
-    for (let i = 0; i < 3; i++) {
-      const p = players[i];
-      if (i > 0) {
-        const { error } = await p.client.rpc("join_room", { p_code: room!.invite_code });
-        if (error) throw error;
-      }
-      const { error } = await p.client.rpc("claim_identity", {
+    for (let i = 1; i < 3; i++) {
+      const { error } = await players[i].client.rpc("join_room", { p_code: room!.invite_code });
+      if (error) throw error;
+    }
+
+    // Admin i pierwszy uczestnik wybierają tożsamość przed startem; trzeci dopiero po nim.
+    for (let i = 0; i < 2; i++) {
+      const { error } = await players[i].client.rpc("claim_identity", {
         p_room: roomId,
         p_participant: participantIds[i],
       });
@@ -66,33 +69,50 @@ describe.skipIf(!enabled)("punkt 5: prywatność wyników przez API (RLS + RPC)"
     const { error: startErr } = await admin0.client.rpc("start_room", { p_room: roomId });
     if (startErr) throw startErr;
 
-    for (const p of players) {
-      const { data, error } = await p.client.rpc("draw_name", { p_room: roomId });
-      if (error) throw error;
-      expect(names).toContain(data);
-    }
+    const { error: lateErr } = await players[2].client.rpc("claim_identity", {
+      p_room: roomId,
+      p_participant: participantIds[2],
+    });
+    if (lateErr) throw lateErr;
   });
 
   afterAll(async () => {
     for (const id of created) await admin.auth.admin.deleteUser(id);
   });
 
-  it("losujący widzi swój wynik przez get_my_draw", async () => {
+  it("przed losowaniem get_my_draw nie zdradza wyniku", async () => {
     const { data, error } = await players[1].client.rpc("get_my_draw", { p_room: roomId });
+    expect(error).toBeNull();
+    expect(data).toBeNull();
+  });
+
+  it("osoba, która wybrała tożsamość po zatwierdzeniu, może wylosować", async () => {
+    const { data, error } = await players[2].client.rpc("draw_name", { p_room: roomId });
     expect(error).toBeNull();
     expect(names).toContain(data);
   });
 
-  it("admin widzi w tabeli draws wyłącznie własne losowanie", async () => {
-    const { data, error } = await players[0].client.from("draws").select("*");
-    expect(error).toBeNull();
-    expect(data).toHaveLength(1);
+  it("losowanie jest idempotentne i get_my_draw zwraca ten sam wynik", async () => {
+    const first = await players[0].client.rpc("draw_name", { p_room: roomId });
+    const second = await players[0].client.rpc("draw_name", { p_room: roomId });
+    expect(first.error).toBeNull();
+    expect(second.data).toBe(first.data);
+    const mine = await players[0].client.rpc("get_my_draw", { p_room: roomId });
+    expect(mine.data).toBe(first.data);
   });
 
-  it("zwykły członek widzi wyłącznie własne losowanie (nie wyniki innych)", async () => {
-    const { data, error } = await players[2].client.from("draws").select("*");
+  it("klient nie może czytać tabeli draws (ani swoich, ani cudzych)", async () => {
+    for (const p of players) {
+      const { error } = await p.client.from("draws").select("*");
+      expect(error).not.toBeNull();
+    }
+  });
+
+  it("każdy losuje raz, a licznik rośnie wspólnie dla wszystkich", async () => {
+    const { error } = await players[1].client.rpc("draw_name", { p_room: roomId });
     expect(error).toBeNull();
-    expect(data).toHaveLength(1);
+    const { data } = await players[1].client.from("rooms").select("participant_count, drawn_count").eq("id", roomId).single();
+    expect(data).toEqual({ participant_count: 3, drawn_count: 3 });
   });
 
   it("bezpośredni SELECT na room_participants zwraca tylko własny wiersz", async () => {
@@ -113,9 +133,11 @@ describe.skipIf(!enabled)("punkt 5: prywatność wyników przez API (RLS + RPC)"
     const rooms = await outsider.from("rooms").select("id");
     expect(rooms.data).toHaveLength(0);
     const draws = await outsider.from("draws").select("*");
-    expect(draws.data).toHaveLength(0);
+    expect(draws.error).not.toBeNull();
     const list = await outsider.rpc("list_participants", { p_room: roomId });
     expect(list.error).not.toBeNull();
+    const mine = await outsider.rpc("get_my_draw", { p_room: roomId });
+    expect(mine.error).not.toBeNull();
   });
 
   it("klient nie może zapisywać bezpośrednio do tabel", async () => {
